@@ -1,0 +1,247 @@
+<odoo>
+    <data>
+
+
+        <report
+                id="multicurrency_ledger"
+                model="partner.ledger.multicurrency"
+                string="Partner Ledger Report"
+                report_type="qweb-pdf"
+                name="partner_ledger_multicurrency.multicurrencyledger_report"
+                file="partner_ledger_multicurrency.multicurrencyledger_report"
+        />
+
+
+    
+
+        <template id="multicurrencyledger_report">
+            <t t-call="web.html_container">
+                <t t-call="web.internal_layout">
+                    <t t-set="data_report_margin_top" t-value="12"/>
+                    <t t-set="data_report_header_spacing" t-value="9"/>
+                    <t t-set="data_report_dpi" t-value="110"/>
+                    <div class="page">
+                        <h2>Partner Ledger</h2>
+                        <div class="row">
+                            <div class="col-3">
+                                <strong>Company:</strong>
+                                <p t-esc="env.company.name"/>
+                            </div>
+                            <div class="col-3">
+                                <t t-if="data['form']['date_from']">
+                                    <strong>Date from :</strong>
+                                    <span t-esc="data['form']['date_from']"/>
+                                    <br/>
+                                </t>
+                                <t t-if="data['form']['date_to']">
+                                    <strong>Date to :</strong>
+                                    <span t-esc="data['form']['date_to']"/>
+                                </t>
+                            </div>
+                            <div class="col-3">
+                                <strong>Target Moves:</strong>
+                                <p t-if="data['form']['targeted_moves'] == 'all'">All Entries</p>
+                                <p t-if="data['form']['targeted_moves'] == 'posted_only'">All Posted Entries</p>
+                            </div>
+
+                            <div class="col-3" style="white-space:nowrap;">
+                                <t t-if="data['form']['partner_account']">
+                                    <strong>Account :</strong>
+                                    <p><span t-esc="data['form']['partner_account'][1]"/></p>
+                                </t>
+                            </div>
+
+
+
+                        </div>
+                        <table class="table table-sm table-reports">
+                            <thead>
+                                <tr>
+                                    <th style="color:white;">Date</th>
+                                    <th>Date</th>
+                                    <th>JRNL</th>
+                                    <th>Account</th>
+                                    <th>Ref</th>
+                                    <th style="text-align:right; white-space:nowrap;">&#160;</th>
+                                    <th style="text-align:right;">Debit</th>
+                                    <th style="text-align:right;">Credit</th>
+                                    <th style="text-align:right;">Balance</th>
+
+                                    <th style="text-align:right;">o_Debit</th>
+                                    <th style="text-align:right;">o_Credit</th>
+                                    <th style="text-align:right;">o_Balance</th>
+                                    <!-- <th t-if="data['form']['amount_currency']">Currency</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="partners" t-as= "partner">
+                                    <tr class="table-secondary">
+                                        <td colspan="11">
+                                            <strong>Partner:&#160; <span t-esc="partner.name"/></strong>
+                                        </td>
+                                        <td><span>&#160;</span></td>
+                                        <!-- <t t-foreach="total" t-as="tot">
+                                           <t t-if="tot['partner'] == partner">
+                                              <td style="text-align:right; white-space:nowrap;"><strong><span t-esc="tot['debit']"/></strong></td>
+                                              <td style="text-align:right; white-space:nowrap;"><strong><span t-esc="tot['credit']"/></strong></td>
+                                              <td style="text-align:right; white-space:nowrap;">
+                                                  <t t-if="tot['balance'] == -0.0">
+                                                    <strong><span t-esc="-1 * tot['balance']"/></strong>
+                                                  </t>
+
+                                                  <t t-else="">
+                                                  <strong><span t-esc="tot['balance']"/></strong>
+                                                  </t>
+                                               </td>
+                                              <td style="text-align:right; white-space:nowrap;"><strong><span t-esc="tot['o_debit']"/></strong></td>
+                                              <td style="text-align:right; white-space:nowrap;"><strong><span t-esc="tot['o_credit']"/></strong></td>
+                                              <td style="text-align:right; white-space:nowrap;"><strong><span t-esc="tot['o_bal']"/></strong></td>
+
+                                           </t>
+                                        </t> -->
+
+
+
+                                    </tr>
+                                    <t t-foreach="currencies" t-as= "curr">
+                                        <t t-set ="c_total" t-value="0.0"/>
+                                        <t t-set ="c_ototal" t-value="0.0"/>
+                                        <tr  class="table-secondary">
+                                            <td colspan="12">
+                                                <strong>Currency:&#160;<span t-esc="curr.name"/></strong>
+                                            </td>
+                                            <!-- <td colspan="7">
+                                              <t t-if="len(init_bal) > 0">
+                                                  <t t-foreach="init_bal" t-as="ib">
+                                                    <t t-if="ib['partner'] == partner ">
+                                                       <t t-if="ib['currency'] == curr ">
+                                                            <strong>Initail balance:&#160;<span t-esc="ib['init_bal']"/></strong>
+                                                       </t>
+                                                    </t>
+                                                  </t>
+                                              </t>
+                                            </td>  -->
+                                        </tr>
+
+
+                                        <tr>
+                                            <td colspan ="2">
+                                                <strong>Initial balance:</strong>
+                                            </td>
+                                            <t t-if="len(init_bal) > 0">
+                                                <t t-foreach="init_bal" t-as="ib">
+                                                    <t t-if="ib['partner'] == partner ">
+                                                        <t t-if="ib['currency'] == curr ">
+                                                            <t t-if="ib['currency'] == company_currency" >
+                                                                <t t-if="float(ib['init_bal']) &gt;= 0.0">
+                                                                    <td colspan="4">
+                                                                    </td>
+                                                                    <td style="white-space:nowrap; text-align:right">
+                                                                        <strong><span t-esc="ib['init_bal']"/></strong>
+                                                                    </td>
+                                                                </t>
+
+                                                                <t t-if="float(ib['init_bal']) &lt; 0.0">
+                                                                    <td colspan="5">
+                                                                    </td>
+                                                                    <td style="white-space:nowrap; text-align:right">
+                                                                        <strong><span t-esc="ib['init_bal']"/></strong>
+                                                                    </td>
+                                                                </t>
+
+
+                                                            </t>
+
+                                                            <t t-else="" >
+                                                                <t t-if="float(ib['init_bal']) &gt;= 0.0">
+                                                                    <td colspan="7">
+                                                                    </td>
+                                                                    <td style="white-space:nowrap; text-align:right">
+                                                                        <strong><span t-esc="ib['init_bal']"/></strong>
+                                                                    </td>
+                                                                </t>
+
+                                                                <t t-if="float(ib['init_bal']) &lt; 0.0">
+                                                                    <td colspan="8">
+                                                                    </td>
+                                                                    <td style="white-space:nowrap; text-align:right">
+                                                                        <strong><span t-esc="ib['init_bal']"/></strong>
+                                                                    </td>
+                                                                </t>
+
+
+                                                            </t>
+
+
+                                                            <!--                                                         <strong>Initial balance:&#160;<span t-esc="ib['init_bal']"/></strong> -->
+                                                        </t>
+                                                    </t>
+                                                </t>
+                                            </t>
+
+                                        </tr>
+
+
+                                        <t t-foreach="move_lines" t-as= "line">
+                                            <t t-if="line['prtnr'].id == partner.id">
+                                                <t t-if="line['currency'].id == curr.id">
+                                                    <tr>
+                                                        <td><span t-esc="test"/></td>
+                                                        <td style="white-space:nowrap;"><span t-esc="line['date']"/></td>
+                                                        <td><span t-esc="test"/></td>
+                                                        <td><span t-esc="line['account']"/></td>
+                                                        <td style="white-space:nowrap;"><span t-esc="line['ref']"/></td>
+
+                                                        <td></td>
+                                                        <td  style="text-align:right; white-space:nowrap;"><span t-esc="line['debit']" t-options="{'widget': 'monetary', 'display_currency': line['currency']}"/></td>
+                                                        <td style="text-align:right; white-space:nowrap;"><span t-esc="line['credit']" t-options="{'widget': 'monetary', 'display_currency': line['currency']}"/></td>
+                                                        <td style="text-align:right; white-space:nowrap;">
+                                                            <t t-set ="c_total" t-value="c_total + line['balance']"/>
+                                                             <span t-esc="line['balance']" t-options="{'widget': 'monetary', 'display_currency': line['currency']}"/>
+                                                                 
+                                                        </td>
+                                                        <td style="text-align:right; white-space:nowrap;"><span t-esc="line['o_debit']" t-options="{'widget': 'monetary', 'display_currency': line['currency']}"/></td>
+                                                        <td style="text-align:right; white-space:nowrap;"><span t-esc="line['o_credit']" t-options="{'widget': 'monetary', 'display_currency': line['currency']}"/></td>
+                                                        <td style="text-align:right; white-space:nowrap;">
+                                                            <t t-set ="c_ototal" t-value="c_ototal + line['o_bal']"/>
+                                                              <span t-esc="line['o_bal']" t-options="{'widget': 'monetary', 'display_currency': line['currency']}"/>
+                                                                
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+                                        </t>
+                                        <tr style="">
+                                            <td colspan="6" style="text-align:right;">
+                                               <strong>Total:</strong>
+                                            </td>
+                                            <td style="text-align:right; border-top:1px solid black;"></td>
+                                            <td style="text-align:right; border-top:1px solid black;"></td>
+                                            <td  style="text-align:right; border-top:1px solid black;">
+                                                <strong><span t-esc="'{:.2f}'.format(c_total)"/></strong>
+                                            </td>
+                                            <td style="text-align:right; border-top:1px solid black;"></td>
+                                            <td style="text-align:right; border-top:1px solid black;"></td>
+                                              <td  style="text-align:right; border-top:1px solid black;">
+                                                <strong><span t-esc="'{:.2f}'.format(c_ototal)" /></strong>
+                                            </td>
+                                        </tr>
+                                        
+                                           <!-- currency total area -->
+
+                                    </t>
+                                    
+                                    
+                                    
+                                </t>
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>            
